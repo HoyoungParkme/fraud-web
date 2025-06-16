@@ -27,16 +27,17 @@ export default function InputForm({ onResult }) {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const res = await fetch("https://fraud-api-m8dd.onrender.com/predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData)
-    });
-    const result = await res.json();
-    onResult(result);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const res = await fetch("https://fraud-api-m8dd.onrender.com/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ raw: formData }) // ★ 여기 수정
+  });
+
+  const result = await res.json();
+  onResult(result);
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
