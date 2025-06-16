@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/fraud-web/static/css/main.e6c13ad2.css",
-    "main.js": "/fraud-web/static/js/main.691e8ffd.js",
+    "main.js": "/fraud-web/static/js/main.b7321413.js",
     "index.html": "/fraud-web/index.html",
     "main.e6c13ad2.css.map": "/fraud-web/static/css/main.e6c13ad2.css.map",
-    "main.691e8ffd.js.map": "/fraud-web/static/js/main.691e8ffd.js.map"
+    "main.b7321413.js.map": "/fraud-web/static/js/main.b7321413.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.691e8ffd.js"
+    "static/js/main.b7321413.js"
   ]
 }
