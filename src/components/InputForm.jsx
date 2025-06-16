@@ -16,23 +16,30 @@ export default function InputForm({ onResult }) {
     claim_est_payout: 0,
     age_of_vehicle: 0,
     vehicle_category: "",
-    vehicle_color: ""
+    vehicle_color: "",
+    age_of_driver: 0,         
+    safty_rating: 0,           
+    annual_income: 0,          
+    vehicle_price: 0,         
+    vehicle_weight: 0       
   });
 
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "number" ? Number(value) : value
-    }));
-  };
+const handleChange = (e) => {
+  const { name, value, type } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "number" || name === "liab_prct" || name === "claim_est_payout" || name === "age_of_vehicle" || name === "past_num_of_claims" || name === "high_education_ind" || name === "policy_report_filed_ind"
+      ? Number(value)
+      : value,
+  }));
+};
 
  const handleSubmit = async (e) => {
   e.preventDefault();
   const res = await fetch("https://fraud-api-m8dd.onrender.com/predict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ raw: formData }) // ★ 여기 수정
+    body: JSON.stringify(formData)  // ★ 여기 수정
   });
 
   const result = await res.json();
