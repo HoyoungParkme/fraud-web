@@ -1,169 +1,131 @@
 import React, { useState } from "react";
 
-export default function InputForm({ onResult }) {
+export default function InputForm({ onResult, setLoading }) {
   const [formData, setFormData] = useState({
-    gender: "",
-    marital_status: "",
+    gender: "Male",
+    marital_status: "Married",
     high_education_ind: 0,
-    address_change_ind: "",
-    living_status: "",
-    accident_site: "",
+    address_change_ind: "Changed",
+    living_status: "Own",
+    accident_site: "Local",
     past_num_of_claims: 0,
-    witness_present_ind: "",
-    liab_prct: 0,
-    channel: "",
-    policy_report_filed_ind: 0,
-    claim_est_payout: 0,
-    age_of_vehicle: 0,
-    vehicle_category: "",
-    vehicle_color: "",
-    age_of_driver: 0,         
-    safty_rating: 0,           
-    annual_income: 0,          
-    vehicle_price: 0,         
-    vehicle_weight: 0       
+    witness_present_ind: "No witness",
+    liab_prct: 42,
+    channel: "Broker",
+    policy_report_filed_ind: 1,
+    claim_est_payout: 2748.61,
+    age_of_vehicle: 8,
+    vehicle_category: "Compact",
+    vehicle_price: 19799.63,
+    vehicle_color: "black",
+    age_of_driver: 33,
+    safty_rating: 34,
+    annual_income: 35113.78,
+    vehicle_weight: 11640.45,
   });
 
-const handleChange = (e) => {
-  const { name, value, type } = e.target;
-  setFormData((prev) => ({
-    ...prev,
-    [name]: type === "number" || name === "liab_prct" || name === "claim_est_payout" || name === "age_of_vehicle" || name === "past_num_of_claims" || name === "high_education_ind" || name === "policy_report_filed_ind"
-      ? Number(value)
-      : value,
-  }));
-};
+  const handleChange = (e) => {
+    const { name, value, type } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "number" ? Number(value) : value,
+    }));
+  };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  const res = await fetch("https://fraud-api-m8dd.onrender.com/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(formData)  // ★ 여기 수정
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (setLoading) setLoading(true);
 
-  const result = await res.json();
-  onResult(result);
-};
+    try {
+      const res = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await res.json();
+      console.log("백엔드 응답:", result);
+
+      if (!res.ok || result.prediction === undefined || isNaN(result.prediction)) {
+        throw new Error("예측값이 유효하지 않음");
+      }
+
+      onResult(result); // 결과 전달
+    } catch (err) {
+      alert("예측 중 오류 발생: " + err.message);
+      onResult(null);
+    } finally {
+      if (setLoading) setLoading(false);
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
-      {/* Text-based select fields */}
-      <select name="gender" value={formData.gender} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>성별 선택 (Male / Female)</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+      {/* 셀렉트 박스 그룹 */}
+      <div className="grid grid-cols-2 gap-4">
+        {[
+          { name: "gender", label: "성별", options: ["Female", "Male"] },
+          { name: "marital_status", label: "결혼 여부", options: ["Married", "Not married", "Unknown"] },
+          { name: "address_change_ind", label: "주소 변경 여부", options: ["Changed", "Not changed"] },
+          { name: "living_status", label: "거주 형태", options: ["Own", "Rent"] },
+          { name: "accident_site", label: "사고 장소", options: ["Highway", "Local", "Parking Lot"] },
+          { name: "witness_present_ind", label: "목격자 유무", options: ["No witness", "Unknown", "Witness"] },
+          { name: "channel", label: "가입 경로", options: ["Broker", "Online", "Phone"] },
+          { name: "vehicle_category", label: "차량 종류", options: ["Compact", "Large", "Medium"] },
+          { name: "vehicle_color", label: "차량 색상", options: ["black", "blue", "gray", "other", "red", "silver", "white"] },
+        ].map(({ name, label, options }) => (
+          <div key={name}>
+            <label className="block mb-1 font-medium">{label}</label>
+            <select
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+            >
+              <option value="" disabled>{`${label} 선택`}</option>
+              {options.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        ))}
+      </div>
 
-      <select name="marital_status" value={formData.marital_status} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>결혼 여부 선택 (Married / Single)</option>
-        <option value="Married">Married</option>
-        <option value="Single">Single</option>
-      </select>
+      {/* 숫자 입력 필드 그룹 */}
+      <fieldset className="grid grid-cols-2 gap-4">
+        {[
+          ["age_of_driver", "운전자 나이", "예: 33"],
+          ["safty_rating", "안전 등급", "예: 34"],
+          ["annual_income", "연간 수입", "예: 35113.78"],
+          ["vehicle_price", "차량 가격", "예: 19799.63"],
+          ["vehicle_weight", "차량 무게", "예: 11640.45"],
+          ["high_education_ind", "고등교육 여부 (0/1)", "예: 0"],
+          ["past_num_of_claims", "과거 클레임 수", "예: 0"],
+          ["liab_prct", "책임 비율 (%)", "예: 42"],
+          ["policy_report_filed_ind", "정책 보고 여부 (0/1)", "예: 1"],
+          ["claim_est_payout", "청구 예상 금액", "예: 2748.61"],
+          ["age_of_vehicle", "차량 연식", "예: 8"],
+        ].map(([name, label, placeholder]) => (
+          <div key={name}>
+            <label className="block mb-1 font-medium">{label}</label>
+            <input
+              type="number"
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              placeholder={placeholder}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+        ))}
+      </fieldset>
 
-      <select name="address_change_ind" value={formData.address_change_ind} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>주소 변경 여부 (No Change / Changed)</option>
-        <option value="No Change">No Change</option>
-        <option value="Changed">Changed</option>
-      </select>
-
-      <select name="living_status" value={formData.living_status} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>거주 상태 (Own / Rent / Other)</option>
-        <option value="Own">Own</option>
-        <option value="Rent">Rent</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <select name="accident_site" value={formData.accident_site} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>사고 장소 (Local / Parking Lot / Street)</option>
-        <option value="Local">Local</option>
-        <option value="Parking Lot">Parking Lot</option>
-        <option value="Street">Street</option>
-      </select>
-
-      <select name="witness_present_ind" value={formData.witness_present_ind} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>목격자 유무 (No witness / Yes)</option>
-        <option value="No witness">No witness</option>
-        <option value="Yes">Yes</option>
-      </select>
-
-      <select name="channel" value={formData.channel} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>채널 (Agent / Broker / Online / Phone)</option>
-        <option value="Agent">Agent</option>
-        <option value="Broker">Broker</option>
-        <option value="Online">Online</option>
-        <option value="Phone">Phone</option>
-      </select>
-
-      <select name="vehicle_category" value={formData.vehicle_category} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>차량 종류 (Compact / Medium / Large)</option>
-        <option value="Compact">Compact</option>
-        <option value="Medium">Medium</option>
-        <option value="Large">Large</option>
-      </select>
-
-      <select name="vehicle_color" value={formData.vehicle_color} onChange={handleChange} required className="w-full p-2 rounded">
-        <option value="" disabled>차량 색상</option>
-        <option value="black">black</option>
-        <option value="white">white</option>
-        <option value="gray">gray</option>
-        <option value="red">red</option>
-        <option value="blue">blue</option>
-        <option value="silver">silver</option>
-        <option value="other">other</option>
-      </select>
-
-      {/* 숫자 입력 필드 */}
-      <input
-        type="number"
-        name="high_education_ind"
-        value={formData.high_education_ind}
-        onChange={handleChange}
-        placeholder="고등교육 여부 (0 또는 1)"
-        className="w-full p-2 rounded"
-      />
-      <input
-        type="number"
-        name="past_num_of_claims"
-        value={formData.past_num_of_claims}
-        onChange={handleChange}
-        placeholder="과거 클레임 수 (예: 0)"
-        className="w-full p-2 rounded"
-      />
-      <input
-        type="number"
-        name="liab_prct"
-        value={formData.liab_prct}
-        onChange={handleChange}
-        placeholder="책임 비율 (0~100)"
-        className="w-full p-2 rounded"
-      />
-      <input
-        type="number"
-        name="policy_report_filed_ind"
-        value={formData.policy_report_filed_ind}
-        onChange={handleChange}
-        placeholder="정책 보고 여부 (0 또는 1)"
-        className="w-full p-2 rounded"
-      />
-      <input
-        type="number"
-        name="claim_est_payout"
-        value={formData.claim_est_payout}
-        onChange={handleChange}
-        placeholder="청구 예상 금액 (예: 2700)"
-        className="w-full p-2 rounded"
-      />
-      <input
-        type="number"
-        name="age_of_vehicle"
-        value={formData.age_of_vehicle}
-        onChange={handleChange}
-        placeholder="차량 연식 (예: 8)"
-        className="w-full p-2 rounded"
-      />
-
-      <button type="submit" className="w-full bg-black text-white py-2 rounded mt-4">
+      <button
+        type="submit"
+        className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+      >
         예측하기
       </button>
     </form>
