@@ -46,7 +46,7 @@ export default function InputForm({ onResult, setLoading }) {
       const result = await res.json();
       console.log("백엔드 응답:", result);
 
-      if (!res.ok || result.prediction === undefined || isNaN(result.prediction)) {
+      if (!res.ok || result.probability === undefined || isNaN(result.probability)) {
         throw new Error("예측값이 유효하지 않음");
       }
 
@@ -61,7 +61,6 @@ export default function InputForm({ onResult, setLoading }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
-      {/* 셀렉트 박스 그룹 */}
       <div className="grid grid-cols-2 gap-4">
         {[
           { name: "gender", label: "성별", options: ["Female", "Male"] },
@@ -92,7 +91,6 @@ export default function InputForm({ onResult, setLoading }) {
         ))}
       </div>
 
-      {/* 숫자 입력 필드 그룹 */}
       <fieldset className="grid grid-cols-2 gap-4">
         {[
           ["age_of_driver", "운전자 나이", "예: 33"],

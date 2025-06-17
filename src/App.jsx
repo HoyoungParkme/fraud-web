@@ -7,7 +7,7 @@ function App() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleResult = (data) => {
-    if (data?.prediction === undefined || isNaN(data.prediction)) {
+    if (data?.probability === undefined || isNaN(data.probability)) {
       setErrorMsg("예측값이 유효하지 않습니다.");
       setResult(null);
     } else {
@@ -25,9 +25,15 @@ function App() {
       {errorMsg && <p className="mt-4 text-red-600">{errorMsg}</p>}
       {result && (
         <div className="mt-4 p-4 border rounded shadow bg-white max-w-md mx-auto">
-          <p className="font-bold mb-2">사기 확률: {(result.prediction * 100).toFixed(2)}%</p>
-          <p className={`font-bold ${result.prediction > 0.5 ? "text-red-600" : "text-green-600"}`}>
-            예측 결과: {result.prediction > 0.5 ? "사기 가능성 있음" : "정상"}
+          <p className="font-bold mb-2">
+            사기 확률: {(result.probability * 100).toFixed(2)}%
+          </p>
+          <p
+            className={`font-bold ${
+              result.is_fraud ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            예측 결과: {result.is_fraud ? "사기 가능성 있음" : "정상"}
           </p>
         </div>
       )}
