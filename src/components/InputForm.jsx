@@ -37,7 +37,7 @@ export default function InputForm({ onResult, setLoading }) {
     if (setLoading) setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/predict", {
+      const res = await fetch("https://fraud-api-m8dd.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
